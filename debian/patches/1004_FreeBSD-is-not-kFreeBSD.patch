@@ -1,0 +1,30 @@
+Description: GNU/kFreeBSD != FreeBSD
+Author: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+
+Index: freerdp2-2.0.0~git20170725.1.1648deb+dfsg1/CMakeLists.txt
+===================================================================
+--- freerdp2-2.0.0~git20170725.1.1648deb+dfsg1.orig/CMakeLists.txt
++++ freerdp2-2.0.0~git20170725.1.1648deb+dfsg1/CMakeLists.txt
+@@ -158,6 +158,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "BSD")
+ 	if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+ 		set(FREEBSD TRUE)
+ 	endif()
++	if(${CMAKE_SYSTEM_NAME} MATCHES "kFreeBSD")
++		set(KFREEBSD TRUE)
++	endif()
+ 	if(${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD")
+ 		set(OPENBSD TRUE)
+ 	endif()
+Index: freerdp2-2.0.0~git20170725.1.1648deb+dfsg1/winpr/libwinpr/utils/CMakeLists.txt
+===================================================================
+--- freerdp2-2.0.0~git20170725.1.1648deb+dfsg1.orig/winpr/libwinpr/utils/CMakeLists.txt
++++ freerdp2-2.0.0~git20170725.1.1648deb+dfsg1/winpr/libwinpr/utils/CMakeLists.txt
+@@ -141,7 +141,7 @@ if(UNIX)
+ 	winpr_library_add(m)
+ endif()
+ 
+-if(FREEBSD)
++if((FREEBSD) AND (NOT KFREEBSD))
+ 	winpr_library_add(execinfo)
+ endif()
+ 

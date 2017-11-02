@@ -1,0 +1,59 @@
+Description: Fix "warning: can't find macro file `www.tmac))'"
+Author: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+
+--- a/server/shadow/freerdp-shadow-cli.1.in
++++ b/server/shadow/freerdp-shadow-cli.1.in
+@@ -1,7 +1,7 @@
+ .de URL
+ \\$2 \(laURL: \\$1 \(ra\\$3
+ ..
+-.if \n[.g] .mso www.tmac))
++.if \n[.g] .mso www.tmac
+ .TH freerdp\-shadow\-cli 1 2017-01-12 "@FREERDP_VERSION_FULL@" "FreeRDP"
+ .SH NAME
+ freerdp\-shadow\-cli \- A utility for sharing a X display via RDP.
+@@ -49,14 +49,14 @@
+ Clients may interact without prompt.
+ .IP /sec:<rdp|tls|nla|ext>
+ Force a specific protocol security
+-.IP -sec-rdp (default:on)
+-Disable RDP security
+-.IP -sec-tls (default:on)
+-Disable TLS protocol security
+-.IP -sec-nla (default:on)
+-Disable NLA protocol security
+-.IP +sec-ext (default:off)
+-Use NLA extended protocol security
++.IP -sec-rdp
++Disable RDP security (default:on)
++.IP -sec-tls
++Disable TLS protocol security (default:on)
++.IP -sec-nla
++Disable NLA protocol security (default:on)
++.IP +sec-ext
++Use NLA extended protocol security (default:off)
+ .IP /sam-file:<file>
+ NTLM SAM file for NLA authentication
+ .IP /version
+--- a/winpr/tools/makecert-cli/winpr-makecert.1.in
++++ b/winpr/tools/makecert-cli/winpr-makecert.1.in
+@@ -1,7 +1,7 @@
+ .de URL
+ \\$2 \(laURL: \\$1 \(ra\\$3
+ ..
+-.if \n[.g] .mso www.tmac))
++.if \n[.g] .mso www.tmac
+ .TH winpr\-makecert 1 2017-01-11 "@FREERDP_VERSION_FULL@" "FreeRDP"
+ .SH NAME
+ winpr\-makecert \- A tool to create X.509 certificates.
+--- a/client/Wayland/wlfreerdp.1.in
++++ b/client/Wayland/wlfreerdp.1.in
+@@ -1,7 +1,7 @@
+ .de URL
+ \\$2 \(laURL: \\$1 \(ra\\$3
+ ..
+-.if \n[.g] .mso www.tmac))
++.if \n[.g] .mso www.tmac
+ .TH wlfreerdp 1 2017-01-12 "@FREERDP_VERSION_FULL@" "FreeRDP"
+ .SH NAME
+ wlfreerdp \- FreeRDP wayland client

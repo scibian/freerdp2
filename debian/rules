@@ -1,0 +1,134 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+CFLAGS+=$(CPPFLAGS)
+CXXFLAGS+=$(CPPFLAGS)
+
+DEB_HOST_ARCH=$(shell dpkg-architecture -qDEB_HOST_ARCH)
+ifneq (,$(filter armel,$(DEB_HOST_ARCH)))
+WITH_NEON = -DWITH_NEON=OFF
+else
+WITH_NEON =
+endif
+
+DEB_HOST_ARCH_OS=$(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+ifeq (,$(filter linux, $(DEB_HOST_ARCH_OS)))
+WITH_WAYLAND = -DWITH_WAYLAND=OFF
+WITH_LIBSYSTEMD = -DWITH_LIBSYSTEMD=OFF
+WITH_ALSA = -DWITH_ALSA=OFF
+else
+WITH_WAYLAND =
+WITH_LIBSYSTEMD =
+WITH_ALSA =
+endif
+
+NULL =
+
+DEB_HOST_ARCH_OS=$(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+ifneq (,$(filter linux,$(DEB_HOST_ARCH_OS)))
+LINUX_URBDRC_CLIENT = -DCHANNEL_URBDRC=ON \
+                      -DCHANNEL_URBDRC_CLIENT=ON \
+                      $(NULL)
+else
+LINUX_URBDRC_CLIENT = -DCHANNEL_URBDRC=OFF \
+                      -DCHANNEL_URBDRC_CLIENT=OFF \
+                      $(NULL)
+endif
+
+DEB_CMAKE_EXTRA_FLAGS :=  -DCMAKE_INSTALL_INCLUDEDIR=include/$(shell dpkg-architecture -qDEB_HOST_MULTIARCH) \
+                          -DCMAKE_SKIP_RPATH=FALSE \
+                          -DCMAKE_SKIP_INSTALL_RPATH=TRUE \
+                          -DWITH_PULSE=ON \
+                          ${WITH_ALSA} \
+                          -DWITH_CHANNELS=ON \
+                          -DBUILTIN_CHANNELS=ON \
+                          -DWITH_CUPS=ON \
+                          -DWITH_PCSC=ON \
+                          -DWITH_JPEG=ON \
+                          -DWITH_GSTREAMER_0_10=OFF \
+                          -DWITH_GSTREAMER_1_0=ON \
+                          $(LINUX_URBDRC_CLIENT) \
+                          -DWITH_SERVER=ON \
+                          -DBUILD_TESTING=OFF \
+                          -DCMAKE_BUILD_TYPE=RELWITHDEBINFO \
+                          $(WITH_WAYLAND) \
+                          $(WITH_LIBSYSTEMD) \
+                          -DWITH_CLIENT_INTERFACE=OFF \
+                          $(WITH_NEON) \
+                          $(NULL)
+
+# Ubuntu can't have ffmpeg in main
+ifeq ($(shell dpkg-vendor --is Ubuntu && echo yes),yes)
+DEB_CMAKE_EXTRA_FLAGS += -DWITH_FFMPEG=OFF -DWITH_GSM=OFF
+else
+DEB_CMAKE_EXTRA_FLAGS += -DWITH_GSM=ON
+endif
+
+%:
+	dh $@ --parallel
+
+.PHONY: override_dh_auto_configure override_dh_install override_dh_strip
+override_dh_auto_configure:
+	dh_auto_configure -- $(DEB_CMAKE_EXTRA_FLAGS)
+
+override_dh_install:
+	rm -rf debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.a
+	mkdir -p debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/freerdp/
+	dh_install --fail-missing
+
+override_dh_strip:
+	dh_strip -plibfreerdp2-2 --dbgsym-migration='libfreerdp2-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -plibfreerdp-server2-2 --dbgsym-migration='libfreerdp-server2-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -plibfreerdp-shadow2-2 --dbgsym-migration='libfreerdp-shadow2-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -plibfreerdp-shadow-subsystem2-2 --dbgsym-migration='libfreerdp-shadow2-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -plibfreerdp-client2-2 --dbgsym-migration='libfreerdp-client2-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -plibwinpr2-2 --dbgsym-migration='libwinpr2-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -plibwinpr-tools2-2 --dbgsym-migration='libwinpr-tools2-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -pfreerdp2-x11 --dbgsym-migration='freerdp2-x11-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -pfreerdp2-shadow-x11 --dbgsym-migration='freerdp2-shadow-x11-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -pwinpr-utils --dbgsym-migration='winpr-utils-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -pfreerdp2-wayland --dbgsym-migration='freerdp2-wayland-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+	dh_strip -plibuwac0-0 --dbgsym-migration='libuwac0-dbg (<< 2.0.0~git20161130.1.e60d0d5+dfsg1-1~exp1~)'
+
+include /usr/share/dpkg/pkg-info.mk
+
+PKD   = $(word 1,$(abspath $(dir $(MAKEFILE_LIST))))
+PKG   = $(DEB_SOURCE)
+UVER  = $(shell echo $(DEB_VERSION) | cut -d "-" -f1)
+DTYPE = +dfsg1
+VER  ?= $(subst $(DTYPE),,$(UVER))
+
+UURL = git://github.com/FreeRDP/FreeRDP.git
+UREV = $(shell echo $(VER) | cut -d"." -f5)
+
+## http://wiki.debian.org/onlyjob/get-orig-source
+.PHONY: get-orig-source
+get-orig-source: $(PKG)_$(VER)$(DTYPE).orig.tar.xz $(info I: $(PKG)_$(VER)$(DTYPE))
+	@
+
+$(PKG)_$(VER)$(DTYPE).orig.tar.xz: $(info I: GIT Revision=$(UREV))
+	$(if $(wildcard $(PKG)-$(VER)),$(error $(PKG)-$(VER) exist, aborting..))
+	@echo "# Downloading..."
+	git clone $(UURL) $(PKG)-$(VER) \
+	    || $(RM) -r $(PKG)-$(VER)
+	cd $(PKG)-$(VER) \
+	    && git checkout "$(UREV)" \
+	    && ( echo "# Generating ChangeLog..." \
+	       ; git --no-pager log --format="%ai %aN (%h) %n%n%x09*%w(68,0,10) %s%n" > ChangeLog \
+	       ; touch -d "$$(git log -1 --format='%ci')" ChangeLog) \
+	    && echo "# Setting times..." \
+	    && for F in $$(git ls-tree -r --name-only HEAD); do touch --no-dereference -d "$$(git log -1 --format="%ai" -- $$F)" "$$F"; done \
+	    && echo "# Cleaning-up..." \
+	    && rm -rf \
+	        client/Android/ \
+	        client/iOS/ \
+	        client/Mac/ \
+	        client/Windows/ \
+	        scripts/OpenSSL-DownloadAndBuild.command \
+	    && $(RM) -r .git .git*
+	@echo "# Packing..."
+	find -L "$(PKG)-$(VER)" -xdev -type f -print | sort \
+	    | XZ_OPT="-6v" tar -caf "../$(PKG)_$(VER)$(DTYPE).orig.tar.xz" -T- --owner=root --group=root --mode=a+rX \
+	    && $(RM) -r "$(PKG)-$(VER)"

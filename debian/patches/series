@@ -1,0 +1,5 @@
+0001-Fix-gstreamer-1.0-detection.patch
+1001_Typo-Fixes.patch
+1002_macro-fix-in-man-pages.patch
+1003_fix-FTBFS-on-kFreeBSD.patch
+1004_FreeBSD-is-not-kFreeBSD.patch

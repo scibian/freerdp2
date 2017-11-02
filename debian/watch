@@ -1,0 +1,4 @@
+version=3
+opts=filenamemangle=s/.*\/v?([\d\.-]+)\.tar\.gz/freerdp-$1.tar.gz/,dversionmangle=s/\+dfsg1// \
+https://github.com/FreeRDP/FreeRDP/tags .*/archive/v?([\d\.]+).tar.gz
+

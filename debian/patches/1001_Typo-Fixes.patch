@@ -1,0 +1,58 @@
+Description: Fix some error msg typos
+Author: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -11638,7 +11638,7 @@
+ 
+ 2015-03-16 10:25:31 +0100 Armin Novak (b39940e0a) 
+ 
+-	* Added ignore unkown keyword flag to detection.
++	* Added ignore unknown keyword flag to detection.
+ 
+ 2015-03-16 10:15:37 +0100 Armin Novak (c380fb352) 
+ 
+--- a/channels/rdpgfx/client/rdpgfx_main.c
++++ b/channels/rdpgfx/client/rdpgfx_main.c
+@@ -1684,7 +1684,7 @@
+ 		if (!gfx->log)
+ 		{
+ 			free(gfx);
+-			WLog_ERR(TAG, "Failed to aquire reference to WLog %s", TAG);
++			WLog_ERR(TAG, "Failed to acquire reference to WLog %s", TAG);
+ 			return ERROR_INTERNAL_ERROR;
+ 		}
+ 
+--- a/winpr/libwinpr/comm/comm_serial_sys.c
++++ b/winpr/libwinpr/comm/comm_serial_sys.c
+@@ -1209,7 +1209,7 @@
+ 	if (ioctl(pComm->fd, TIOCGICOUNT, &currentCounters) < 0)
+ 	{
+ 		CommLog_Print(WLOG_WARN, "TIOCGICOUNT ioctl failed, errno=[%d] %s.", errno, strerror(errno));
+-		CommLog_Print(WLOG_WARN, "  coult not read counters.");
++		CommLog_Print(WLOG_WARN, "  could not read counters.");
+ 		
+ 		if (pComm->permissive)
+ 		{
+--- a/winpr/tools/hash-cli/hash.c
++++ b/winpr/tools/hash-cli/hash.c
+@@ -116,7 +116,7 @@
+ 
+ 			if ((version != 1) && (version != 2))
+ 			{
+-				printf("unkown version %d \n\n", version);
++				printf("unknown version %d \n\n", version);
+ 				usage_and_exit();
+ 			}
+ 		}
+--- a/winpr/tools/makecert-cli/winpr-makecert.1.in
++++ b/winpr/tools/makecert-cli/winpr-makecert.1.in
+@@ -15,7 +15,7 @@
+ [\fB-n\fP common_name]
+ [\fB-y\fP years]
+ [\fB-m\fP months]
+-[\fB-len\fP lenth]
++[\fB-len\fP length]
+ [\fB-#\fP serial]
+ [\fB-a\fP { \fImd5\fP | \fIsha1\fP | \fIsha256\fP | \fIs384\fP | \fIsha512\fP }]
+ [\fB-path\fP outputpath] 

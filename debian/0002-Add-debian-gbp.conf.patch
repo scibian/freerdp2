@@ -1,0 +1,21 @@
+From 8ca0f485c1537997d05f90a29a9e77b6fadc6716 Mon Sep 17 00:00:00 2001
+From: Jeremy Bicha <jbicha@debian.org>
+Date: Mon, 30 Oct 2017 00:49:40 -0400
+Subject: [PATCH 2/2] Add debian/gbp.conf
+
+---
+ debian/gbp.conf | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100644 debian/gbp.conf
+
+diff --git a/debian/gbp.conf b/debian/gbp.conf
+new file mode 100644
+index 0000000..cec628c
+--- /dev/null
++++ b/debian/gbp.conf
+@@ -0,0 +1,2 @@
++[DEFAULT]
++pristine-tar = True
+-- 
+2.14.1
+

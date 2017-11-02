@@ -1,0 +1,81 @@
+Description: Handle GNU/kFreeBSD the same way as other BSD variants
+Author: Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
+
+Index: freerdp2-2.0.0~git20170725.1.1648deb+dfsg1/winpr/libwinpr/file/file.c
+===================================================================
+--- freerdp2-2.0.0~git20170725.1.1648deb+dfsg1.orig/winpr/libwinpr/file/file.c
++++ freerdp2-2.0.0~git20170725.1.1648deb+dfsg1/winpr/libwinpr/file/file.c
+@@ -23,6 +23,10 @@
+ #include "config.h"
+ #endif /* HAVE_CONFIG_H */
+ 
++#if defined(__FreeBSD_kernel__) && defined(__GLIBC__)
++#define _GNU_SOURCE
++#endif
++
+ #include <winpr/crt.h>
+ #include <winpr/file.h>
+ 
+@@ -384,7 +388,7 @@ static BOOL FileSetFileTime(HANDLE hFile
+                             const FILETIME* lpLastAccessTime, const FILETIME* lpLastWriteTime)
+ {
+ 	int rc;
+-#if defined(__APPLE__) || defined(ANDROID) || defined(__FreeBSD__)
++#if defined(__APPLE__) || defined(ANDROID) || defined(__FreeBSD__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
+ 	struct stat buf;
+ 	/* OpenBSD, NetBSD and DragonflyBSD support POSIX futimens */
+ 	struct timeval timevals[2];
+@@ -396,7 +400,7 @@ static BOOL FileSetFileTime(HANDLE hFile
+ 	if (!hFile)
+ 		return FALSE;
+ 
+-#if defined(__APPLE__) || defined(ANDROID) || defined(__FreeBSD__)
++#if defined(__APPLE__) || defined(ANDROID) || defined(__FreeBSD__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
+ 	rc = fstat(fileno(pFile->fp), &buf);
+ 
+ 	if (rc < 0)
+@@ -406,7 +410,7 @@ static BOOL FileSetFileTime(HANDLE hFile
+ 
+ 	if (!lpLastAccessTime)
+ 	{
+-#if defined(__FreeBSD__) || defined(__APPLE__)
++#if defined(__FreeBSD__) || defined(__APPLE__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
+ 		timevals[0].tv_sec = buf.st_atime;
+ #ifdef _POSIX_SOURCE
+ 		TIMESPEC_TO_TIMEVAL(&timevals[0], &buf.st_atim);
+@@ -424,7 +428,7 @@ static BOOL FileSetFileTime(HANDLE hFile
+ 	else
+ 	{
+ 		UINT64 tmp = FileTimeToUS(lpLastAccessTime);
+-#if defined(ANDROID) || defined(__FreeBSD__) || defined(__APPLE__)
++#if defined(ANDROID) || defined(__FreeBSD__) || defined(__APPLE__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
+ 		timevals[0].tv_sec = tmp / 1000000ULL;
+ 		timevals[0].tv_usec = tmp % 1000000ULL;
+ #else
+@@ -435,7 +439,7 @@ static BOOL FileSetFileTime(HANDLE hFile
+ 
+ 	if (!lpLastWriteTime)
+ 	{
+-#if defined(__FreeBSD__) || defined(__APPLE__)
++#if defined(__FreeBSD__) || defined(__APPLE__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
+ 		timevals[1].tv_sec = buf.st_mtime;
+ #ifdef _POSIX_SOURCE
+ 		TIMESPEC_TO_TIMEVAL(&timevals[1], &buf.st_mtim);
+@@ -453,7 +457,7 @@ static BOOL FileSetFileTime(HANDLE hFile
+ 	else
+ 	{
+ 		UINT64 tmp = FileTimeToUS(lpLastWriteTime);
+-#if defined(ANDROID) || defined(__FreeBSD__) || defined(__APPLE__)
++#if defined(ANDROID) || defined(__FreeBSD__) || defined(__APPLE__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
+ 		timevals[1].tv_sec = tmp / 1000000ULL;
+ 		timevals[1].tv_usec = tmp % 1000000ULL;
+ #else
+@@ -463,7 +467,7 @@ static BOOL FileSetFileTime(HANDLE hFile
+ 	}
+ 
+ 	// TODO: Creation time can not be handled!
+-#if defined(ANDROID) || defined(__FreeBSD__) || defined(__APPLE__)
++#if defined(ANDROID) || defined(__FreeBSD__) || defined(__APPLE__) || (defined(__FreeBSD_kernel__) && defined(__GLIBC__))
+ 	rc = utimes(pFile->lpFileName, timevals);
+ #else
+ 	rc = futimens(fileno(pFile->fp), times);

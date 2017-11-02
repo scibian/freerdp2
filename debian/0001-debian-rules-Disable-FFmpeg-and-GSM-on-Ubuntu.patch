@@ -1,0 +1,40 @@
+From e959e7f8997850e77228ddc3bd02f6d0acd77d4f Mon Sep 17 00:00:00 2001
+From: Jeremy Bicha <jbicha@debian.org>
+Date: Mon, 30 Oct 2017 01:39:07 -0400
+Subject: [PATCH] debian/rules: Disable FFmpeg and GSM on Ubuntu
+
+Closes: #880157
+---
+ debian/rules | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/debian/rules b/debian/rules
+index 817910b..44b039e 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -49,7 +49,6 @@ DEB_CMAKE_EXTRA_FLAGS :=  -DCMAKE_INSTALL_INCLUDEDIR=include/$(shell dpkg-archit
+                           -DWITH_JPEG=ON \
+                           -DWITH_GSTREAMER_0_10=OFF \
+                           -DWITH_GSTREAMER_1_0=ON \
+-                          -DWITH_GSM=ON \
+                           $(LINUX_URBDRC_CLIENT) \
+                           -DWITH_SERVER=ON \
+                           -DBUILD_TESTING=OFF \
+@@ -59,6 +58,14 @@ DEB_CMAKE_EXTRA_FLAGS :=  -DCMAKE_INSTALL_INCLUDEDIR=include/$(shell dpkg-archit
+                           -DWITH_CLIENT_INTERFACE=OFF \
+                           $(WITH_NEON) \
+                           $(NULL)
++
++# Ubuntu can't have ffmpeg in main
++ifeq ($(shell dpkg-vendor --is Ubuntu && echo yes),yes)
++DEB_CMAKE_EXTRA_FLAGS += -DWITH_FFMPEG=OFF -DWITH_GSM=OFF
++else
++DEB_CMAKE_EXTRA_FLAGS += -DWITH_GSM=ON
++endif
++
+ %:
+ 	dh $@ --parallel
+ 
+-- 
+2.14.1
+
